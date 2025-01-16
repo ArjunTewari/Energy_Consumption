@@ -5,16 +5,17 @@ from taipy import Gui
 
 
 #Loading electricity data
-data_elec = pd.read_csv("electricity_cleaned.csv", index_col="timestamp", parse_dates=True)
+data_elec = pd.read_csv("electricity_cleaned_reduced.csv", index_col="timestamp", parse_dates=True)
 building_name = "Panther_office_Hannah"
 data_frame_elec = pd.DataFrame((data_elec[building_name].truncate(before = '2017-01-01')).ffill())
 
+#Since the orignal file is too large to upload on GitHub we will save the new required file.
+# data_frame_elec.to_csv("electricity_cleaned_reduced.csv")
 
 #Loading weather data
-data_weather = pd.read_csv("weather.csv", index_col="timestamp", parse_dates=True)
-data_frame_weather = pd.DataFrame(data_weather[data_weather.site_id == 'Panther'].truncate(before = "2017-01-01").drop(columns={
-    'site_id'}))
-
+data_weather = pd.read_csv("weather_reduced.csv", index_col="timestamp", parse_dates=True)
+data_frame_weather = pd.DataFrame(data_weather.truncate(before = "2017-01-01"))
+# data_frame_weather.to_csv("weather_reduced.csv")
 weather_hourly = data_frame_weather.resample("h").mean()
 weather_hourly_nooutlier = weather_hourly[weather_hourly > -40]
 weather_hourly_nooutlier_nogaps = weather_hourly_nooutlier.ffill()
@@ -27,12 +28,15 @@ test_months = [7]
 training_data = data_frame_elec[data_frame_elec.index.month.isin(training_months)]
 test_data = data_frame_elec[data_frame_elec.index.month.isin(test_months)]
 
+
 #Encoding
 train_features = pd.concat([pd.get_dummies(training_data.index.hour),
                                      pd.get_dummies(training_data.index.dayofweek),
                                      pd.DataFrame(temperature[temperature.index.month.isin(training_months)].values)], axis=1).dropna()
 
 from sklearn.linear_model import HuberRegressor
+from sklearn.preprocessing import MinMaxScaler
+
 model = HuberRegressor().fit(np.array(train_features), np.array(training_data.values))
 
 # from sklearn.ensemble import RandomForestRegressor
