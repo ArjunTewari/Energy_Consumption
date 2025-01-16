@@ -88,7 +88,7 @@ page = """
 <|{prepared_chart}|chart|type=line|x = Index|y[1]=Actual|y[2]=Predicted|title = Actual vs Predicted values|>
 
 <h3> Metrics of the model </h3>
-gi
+
 <|layout|columns = 1 1 1 1|
 # MAE : <|metric|value={mae:.2f}|>
 # RMSE : <|metric|value={rmse:.2f}|>
